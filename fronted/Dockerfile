@@ -1,30 +1,26 @@
-# Use the official Node.js image as the base image
+# Stage 1: Build frontend
 FROM node:14-alpine as build
 
 # Set the working directory in the container
-WORKDIR /usr/src/app
+WORKDIR /app/fronted
 
-# Copy the package.json and package-lock.json files to the working directory
+# Copy package.json and package-lock.json to the working directory
 COPY package*.json ./
 
-# Install the dependencies
+# Install dependencies
 RUN npm install
 
-# Copy the rest of the application code to the working directory
+# Copy the rest of the frontend application code to the working directory
 COPY . .
 
-# Build the React application
+# Build the frontend application
 RUN npm run build
 
-# Use a lightweight web server to serve the React app
+# Stage 2: Serve frontend using NGINX
 FROM nginx:alpine
 
-# Copy the build output to the nginx html directory
-COPY --from=build /usr/src/app/build /usr/share/nginx/html
+# Copy build files from the previous stage to NGINX directory
+COPY --from=build /app/fronted/build /usr/share/nginx/html
 
-# Expose port 80 to the outside world
+# Expose port 80
 EXPOSE 80
-
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
-    

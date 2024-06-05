@@ -1,20 +1,25 @@
-# Use the official Node.js image as the base image
+# Use the official Node.js image as base
 FROM node:14-alpine
 
 # Set the working directory in the container
-WORKDIR /usr/src/app
+WORKDIR /app/backend
 
-# Copy the package.json and package-lock.json files to the working directory
+# Copy package.json and package-lock.json to the working directory
 COPY package*.json ./
 
-# Install the dependencies
+# Install dependencies
 RUN npm install
 
-# Copy the rest of the application code to the working directory
+# Copy the rest of the backend application code to the working directory
 COPY . .
 
-# Expose the port that your application will run on
+# Expose port 8080 (port where Node.js server will listen)
 EXPOSE 5000
 
-# Command to run the application
+# Command to start the Node.js server
 CMD ["npm", "start"]
+
+
+# HEALTHCHECK directive to define a health check for the container
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -fs http://localhost:8080/health || exit 1
